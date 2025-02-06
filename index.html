@@ -19,8 +19,9 @@
   <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
   <style>
     .attribution {
-      font-size: 11px;
+      font-size: 8px;
       text-align: center;
+      color: black;
     }
 
     .attribution a {
@@ -36,58 +37,59 @@
   <main>
     <form id="form">
       <div class="input-card">
-        <div>
+        <div class="bill">
           <div class="input-head">
             <h1>
               Bill
             </h1>
-            <h4 class="error-msg">Invalid dollar amount</h4>
+            <h4 class="error-msg"></h4>
           </div>
-          <input type="text" name="bill-dollars" id="bill-dollars" placeholder="0"/>
+          <input type="text" name="currency" id="bill-dollars" placeholder="0" class="error-target"/>
         </div>
-        <div>
+        <div class="tip">
           <div class="input-head">
             <h1>
             Select Tip %
             </h1>
-            <h4 class="error-msg">Select one</h4>
+            <h4 class="error-msg"></h4>
           </div>
           <fieldset class="tip-selection">
-            <div>
-              <input type="radio" name="percentage" id="five-perc" />
+            <div class="radio-container">
+              <input type="radio" name="tip-choice" id="five-perc"/>
               <label for="five-perc">5%</label>
             </div>
-            <div>
-              <input type="radio" name="percentage" id="ten-perc" />
+            <div class="radio-container">
+              <input type="radio" name="tip-choice" id="ten-perc" />
               <label for="ten-perc">10%</label>
             </div>
-            <div>
-              <input type="radio" name="percentage" id="fifteen-perc"/>
+            <div class="radio-container">
+              <input type="radio" name="tip-choice" id="fifteen-perc" checked/>
               <label for="fifteen-perc">15%</label>
             </div>
-            <div>
-              <input type="radio" name="percentage" id="twentyfive-perc" />
+            <div class="radio-container">
+              <input type="radio" name="tip-choice" id="twentyfive-perc" />
               <label for="twentyfive-perc">25%</label>
             </div>
-            <div>
-              <input type="radio" name="percentage" id="fifty-perc" />
+            <div class="radio-container">
+              <input type="radio" name="tip-choice" id="fifty-perc" />
               <label for="fifty-perc">50%</label>
             </div>
-            <div class="custom">
-              <input type="radio" name="percentage" id="custom-perc" />
+            <div class="custom radio-container">
+              <input type="radio" name="tip-choice" id="custom-perc" />
               <label for="custom-perc">Custom</label>
-              <input type="text" id="custom-perc-input" name="custom-perc-input" placeholder="%"/>
+              <input type="text" id="custom-perc-input" name="percentage" placeholder="0" class="error-target"/>
+              <span>%</span>
             </div>
           </fieldset>
           </div>
-        <div>
+        <div class="party">
           <div class="input-head">
             <h1>
               Number of People
             </h1>
-            <h4 class="error-msg">Cannot be zero</h4>
+            <h4 class="error-msg"></h4>
           </div> 
-          <input type="text" name="num-people" id="num-people" placeholder="0"/>  
+          <input type="text" name="count" id="num-people" placeholder="0" class="error-target"/>  
         </div>
       </div>
       <div class="result-card">
@@ -100,7 +102,7 @@
               / person
             </h3>
           </div>
-          <div id="tip-amount" class="result-dollars">$0.00</div>
+          <div id="tip-amount" class="result-dollars error-target">$0.00</div>
         </div>
         <div class="result-entry">
           <div class="result-caption">
@@ -111,7 +113,7 @@
               / person
             </h3>
           </div>
-          <div id="total-amount" class="result-dollars">$0.00</div>
+          <div id="total-amount" class="result-dollars error-target">$0.00</div>
         </div>    
         <button id="reset-button">Reset</button>
       </div>

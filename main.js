@@ -1,54 +1,85 @@
 const form = document.querySelector('form');
 
-const clearError = () => {
-  // remove any success or error states for a specific form field
-}
+const isCurrency = (n) => {
+  // Check if the input is a positive number and at most 2 digits under decimal point. 
+  if(!n || !n.trim()) return false; // undefined or empty
 
-const renderError = (message) => {
-  // assign an error message to the form
-}
-
-const renderSuccess = () => {
-  // render the success state
-}
-
-const dataIsValid = (name, value) => {
-  // if the value passes validation return true
-  // else return false
-}
-
-const handleChange = (e) => {
-  // remove error message from the form
-  clearError();
-}
-
-const validateCurrency = (input) => {
-  // Using a regular expression for basic validation
-  const regex = /^\d+(\.\d{0,2})?$/; // Matches numbers with optional 2 decimal places
-
-  if (regex.test(input)) {
-    return true;
+  n = Number(n);
+  if (isNaN(n) || n < 0 || (n * 100) - Math.floor(n * 100) != 0) {
+    return false;
   } else {
-    return false;
+    return true;
   }
 }
 
-const validateNaturalNumber = (n) => {
-  // Check if the input is a number 
-  if (typeof n !== 'number' || isNaN(n) || !Number.isInteger(n) || n < 0 ) {
+const isNaturalNumber = (n) => {
+  // Check if the input is a positive integer 
+  if(!n || !n.trim()) return false; // undefined or empty
+  
+  n = Number(n);
+  if (isNaN(n) || !Number.isInteger(n) || n <= 0 ) {
     return false;
   }
   return true;
 }
 
-const validatePercentage = (n) => {
-  // Check if the input is a number 
-  if (typeof n !== 'number' || isNaN(n) || !Number.isInteger(n) || 
-       n <= 0 || n > 100) {
+const isPercentage = (n) => {
+  // Check if the input is a positive number 
+  if(!n || !n.trim()) return false; // undefined or empty
+  
+  n = Number(n);
+  if (isNaN(n) || n < 0) {
     return false;
   }
   return true;
 }
+
+const validations = {
+  currency: (value) => isCurrency(value),
+  count: (value) => isNaturalNumber(value),
+  percentage: (value) => isPercentage(value),
+}
+
+const dataIsValid = (key, value, validations) => {
+  if(!validations[key]) return true;
+
+  return validations[key](value);
+}
+
+const error_messages = {
+  currency: 'input valid dollar amount',
+  count: 'how many people?',
+  percentage: 'input valid percentage'
+}
+
+const handleError = (elm, message) => {
+  // assign an error message to the form
+  let error_msgs = elm.querySelectorAll('.error-msg');
+  for(let elm of error_msgs){
+    elm.innerText = message;
+  }
+  let error_elms = elm.querySelectorAll('.error-target');
+  for(let elm of error_elms){
+    elm.classList.add('invalid');
+  }
+}
+
+const clearError = (elm) => {
+  // render the success state
+  let error_msgs = elm.querySelectorAll('.error-msg');
+  for(let elm of error_msgs){
+    elm.innerText = '';
+  }
+  let error_elms = elm.querySelectorAll('.error-target');
+  for(let elm of error_elms){
+    elm.classList.remove('invalid');
+  }
+}
+
+const name2container = new Map(); //for rendering error indication
+name2container['currency'] = document.querySelector('.bill');
+name2container['percentage'] = document.querySelector('.tip');
+name2container['count'] = document.querySelector('.party');
 
 const myform = document.getElementById('form');
 const handleSubmit = (e) => {
@@ -57,53 +88,54 @@ const handleSubmit = (e) => {
   let isValid = true; // form is valid
   let fdata = new FormData(myform);
   const data = Object.fromEntries(fdata);
-  console.log(fdata);
+
+  //handle radio buttons differently as they are not included in the FormData...
+  let radio_btns = Array.from(document.querySelectorAll('input[name=tip-choice]'));
+  let choice = radio_btns.findIndex((e)=>e.checked);
+  let perc = ['5', '10', '15', '25', '50'];
+  if(choice >= 0 && choice < 5) {
+    data['percentage'] = perc[choice];
+  }
   console.log(data);
 
-  let radio_btns = Array.from(document.querySelectorAll('input[name=percentage]'));
-  let chosen = radio_btns.findIndex((e)=>e.checked);
-  let perc = [5, 10, 15, 25, 50];
-  let num_people = data['num-people'];
-  let total = 0;
-  let tip = 0;
-  let cost = parseFloat(data['bill-dollars']);
-  if(chosen >= 0 && chosen < 5) {
-    tip = cost * perc[chosen] / 100.0;
-    total = cost * (1 + perc[chosen] / 100.0);
-  } else if(chosen == 5) { //custom percentage
-    let val = parseInt(data['custom-perc-input']);
-    tip = cost * val / 100.0;
-    total = cost * (1 + val / 100.0);
+  Object.keys(data).forEach((name) => {
+    // pass in the validations to `dataIsValid` as the third argument
+    if(!dataIsValid(name, data[name], validations)) {
+      console.log('invalid: ', name, data[name]);
+      let div = name2container[name];
+      handleError(div, error_messages[name]);
+      isValid = false;
+    } else {
+      let div = name2container[name];
+      if(div) {
+        clearError(name2container[name]);
+      }
+      console.log('valid: ', name, data[name]);
+    }
+  });
+
+  let result_area = document.querySelector('.result-card');
+  if(!isValid) {
+    handleError(result_area);
+    document.getElementById('tip-amount').innerText = '$0.00';
+    document.getElementById('total-amount').innerText = '$0.00';
   }
-  tip = tip / num_people;
-  total = total / num_people;
-  document.getElementById('tip-amount').innerText = '$' + tip.toFixed(2);
-  document.getElementById('total-amount').innerText = '$' + total.toFixed(2);
-  //console.log(radio_btns, k);
+  else {
+    clearError(result_area);
+    let cost = parseFloat(data['currency']);
+    let num_people = parseInt(data['count']);
+    let tip_perc = parseFloat(data['percentage']);
+    let tip_amount = cost * (tip_perc / 100.0);
+    let total = cost + tip_amount;
+  
+    let tip_average = tip_amount / num_people;
+    let average = total / num_people;
+    console.log(cost, num_people, tip_perc, tip_amount, total, tip_average, average);
+    document.getElementById('tip-amount').innerText = '$' + tip_average.toFixed(2);
+    document.getElementById('total-amount').innerText = '$' + average.toFixed(2);
+  }
 
-  // get the data from the form
-  //console.log(myform);
-  //console.log(data);
-
-
-
-  // // loop over the data
-  // Object.keys(data).forEach((name) => {
-  //   // check if the value of the field is valid
-  //   if(!dataIsValid(name, data[name])) {
-  //     // if the data is invalid set `isValid` to false
-  //     isValid = false;
-  //   }
-  // });
-
-  // // if the form is valid
-  // if(isValid) {
-  //   // render the success state
-  //   renderSuccess()
-  // } else {
-  //   // else render an appropriate error message
-  //   renderError('Some data you have supplied is invalid');
-  // }
+  return isValid;
 }
 
 const inputs = document.querySelectorAll('input');
