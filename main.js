@@ -96,12 +96,12 @@ const handleSubmit = (e) => {
   if(choice >= 0 && choice < 5) {
     data['percentage'] = perc[choice];
   }
-  console.log(data);
+  // console.log(data);
 
   Object.keys(data).forEach((name) => {
     // pass in the validations to `dataIsValid` as the third argument
     if(!dataIsValid(name, data[name], validations)) {
-      console.log('invalid: ', name, data[name]);
+      // console.log('invalid: ', name, data[name]);
       let div = name2container[name];
       handleError(div, error_messages[name]);
       isValid = false;
@@ -110,7 +110,7 @@ const handleSubmit = (e) => {
       if(div) {
         clearError(name2container[name]);
       }
-      console.log('valid: ', name, data[name]);
+      // console.log('valid: ', name, data[name]);
     }
   });
 
@@ -130,7 +130,7 @@ const handleSubmit = (e) => {
   
     let tip_average = tip_amount / num_people;
     let average = total / num_people;
-    console.log(cost, num_people, tip_perc, tip_amount, total, tip_average, average);
+    // console.log(cost, num_people, tip_perc, tip_amount, total, tip_average, average);
     document.getElementById('tip-amount').innerText = '$' + tip_average.toFixed(2);
     document.getElementById('total-amount').innerText = '$' + average.toFixed(2);
   }
@@ -148,3 +148,12 @@ reset.addEventListener('click', ()=> {
   form.reset();
 });
 
+//this prevents hitting RETURN key inside a textbox from submitting the form.
+Array.from(document.querySelectorAll('input[type=text]')).forEach(elm => {
+  elm.addEventListener('keydown', (event)=>{
+  if(event.code == "Enter") {
+    event.preventDefault();
+    return false;
+  }
+  })
+});
